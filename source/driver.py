@@ -22,17 +22,24 @@ def main():
     cd = 6*np.pi*mu_0*radius
     cd_star = cd/mass_bb
     H = np.array([10,20,40])
-    dt = 60
+    dt = 0.001
 
-    ys_euler = np.array([])
-    ys_rk4 = np.array([])
     
-    for i in H:
-        ode_solver.ode_freefall_euler(g0, dg_dz, cd_star, i, dt).append(ys_euler)
-        #ode_solver.ode_freefall_rk4(g0, dg_dz, cd_star, i, dt).append(ys_rk4)
+    #for i in H:
+    t1,z1,v1 = ode_solver.ode_freefall_euler(g0, dg_dz, cd_star, H[0], dt)
+    t2,z2,v2 = ode_solver.ode_freefall_euler(g0, dg_dz, cd_star, H[1], dt)
+    t3,z3,v3 = ode_solver.ode_freefall_euler(g0, dg_dz, cd_star, H[2], dt)
+    
+    
+    #ode_solver.ode_freefall_rk4(g0, dg_dz, cd_star, i, dt)
 
-
-    plt.plot(H,ys_euler)
+    plt.figure()
+    plt.subplot(311)
+    plt.plot(t1,z1,'r',t1,v1,'b')
+    plt.subplot(312)
+    plt.plot(t2,z2,'r',t2,v2,'b')
+    plt.subplot(313)
+    plt.plot(t3,z3,'r',t3,v3,'b')
     #plt.plot(H,ys_rk4)
     plt.show()
 

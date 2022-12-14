@@ -9,10 +9,10 @@ def ode_freefall_euler(g0, dg_dz, cd_star, H, dt):
         Gravity constant g_0
 
     dg_dz: float
-        g' free-air gradient of gravitational acceleration
+        Free-air gradient of gravitational acceleration g'
 
     cd_star: float
-        c_D*
+        Mass normalized drag coefficient c_D* 
     
     H: float
         Total drop height H
@@ -32,22 +32,25 @@ def ode_freefall_euler(g0, dg_dz, cd_star, H, dt):
     #find N using N=(b-a)/h to find difference 
     a = 0
     b = H
-    N = int(b-a)/dt
-
+    N = int(H/dt)
+    
     t = np.zeros(N)
     z = np.zeros(N)
     v = np.zeros(N)
+    a = np.zeros(N)
 
     t[0] = 0
     z[0] = 0
     v[0] = 0
+    a[0] = 0
 
     #z[-1] = H
     
     for i in np.arange(1,N):
         t[i] = dt * i
-        v[i] = v[i-1] + dt * (g0 + dg_dz * z[i-1] - dt * v[i-1])/cd_star
-        z[i] = z[i-1] + dt
+        a[i] = a[i-1] + dt * (g0 + dg_dz * z[i-1])
+        v[i] = v[i-1] + dt * (g0 + dg_dz * z[i-1] - a[i-1]) / cd_star
+        z[i] = z[i-1] + dt * -1 * (g0 - a[i-1] - cd_star * v[i-1]) / cd_star
         
     return t, z, v
 
@@ -60,10 +63,10 @@ def ode_freefall_rk4(g0, dg_dz, cd_star, H, dt):
         Gravity constant g_0
 
     dg_dz: float
-        g' 
+        Free-air gradient of gravitational acceleration g'
 
     cd_star: float
-        c_D*
+        Mass normalized drag coefficient c_D*
     
     H: float
         Total drop height H
