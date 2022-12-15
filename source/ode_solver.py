@@ -51,7 +51,8 @@ def ode_freefall_euler(g0, dg_dz, cd_star, H, dt):
         a[i] = a[i-1] + dt * (g0 + dg_dz * z[i-1])
         v[i] = v[i-1] + dt * (g0 + dg_dz * z[i-1] - a[i-1]) / cd_star
         z[i] = z[i-1] + dt * -1 * (g0 - a[i-1] - cd_star * v[i-1]) / cd_star
-        
+    print(np.shape(z))
+    print(t[-1])
     return t, z, v
 
 def ode_freefall_rk4(g0, dg_dz, cd_star, H, dt):
@@ -82,11 +83,45 @@ def ode_freefall_rk4(g0, dg_dz, cd_star, H, dt):
     v: np.ndarray
         Array of shape(n) that contains velocity v(t) values 
     """
-    t = np.zeros()
-    z = np.zeros()
-    v = np.zeros()
+    #find N using N=(b-a)/h to find difference 
+    a = 0
+    b = H
+    N = int(H/dt)
+    
+    t = np.zeros(N+1)
+    z = np.zeros(N+1)
+    v = np.zeros(N+1)
+    a = np.zeros(N+1)
 
     t[0] = 0
     z[0] = 0
     v[0] = 0
+    a[0] = 0
+
+    #z[-1] = H
+    
+    for i in np.arange(0,N+1):
+        t[i] = dt * i
+        a[i] = a[i-1] + dt * (g0 + dg_dz * z[i-1])
+        v[i] = v[i-1] + dt * (g0 + dg_dz * z[i-1] - a[i-1]) / cd_star
+        z[i] = z[i-1] + dt * -1 * (g0 - a[i-1] - cd_star * v[i-1]) / cd_star
+
+        a[i] = rk4_step(a[i-1],(g0 + dg_dz * z[i-1]),dt)
+        
     return t, z, v
+
+def rk4_step(y,slope_fn,dt):
+    k1 = dt(slope_fn)
+    k2 = dt(slope_fn)
+    k3 = dt(slope_fn)
+    k4 = dt(slope_fn)
+    
+    y1 = y + dt * (k1 + 2*k2 + 2*k3 + k4)/6
+
+    return y1
+
+def velocity():
+
+def acceleration():
+
+def position():
