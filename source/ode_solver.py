@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def ode_freefall_euler(g0, dg_dz, cd_star, H, dt):
     """Solves a second-order ode using Euler's Method(RK1)
     
@@ -30,29 +31,42 @@ def ode_freefall_euler(g0, dg_dz, cd_star, H, dt):
     """
 
     #find N using N=(b-a)/h to find difference 
-    a = 0
-    b = H
-    N = int(H/dt)
     
+    #N = int(H/dt)
+    N = 1
     t = np.zeros(N)
     z = np.zeros(N)
     v = np.zeros(N)
-    a = np.zeros(N)
-
+    
     t[0] = 0
     z[0] = 0
     v[0] = 0
-    a[0] = 0
-
-    #z[-1] = H
     
-    for i in np.arange(1,N):
-        t[i] = dt * i
-        a[i] = a[i-1] + dt * (g0 + dg_dz * z[i-1])
-        v[i] = v[i-1] + dt * (g0 + dg_dz * z[i-1] - a[i-1]) / cd_star
-        z[i] = z[i-1] + dt * -1 * (g0 - a[i-1] - cd_star * v[i-1]) / cd_star
-    print(np.shape(z))
-    print(t[-1])
+    i=1
+    while z[-1] < H:
+        t = np.append(t,t[i-1] + dt)
+        #print('Value of t[i] #1: ',t[i])
+        v = np.append(v,v[i-1] + dt * (g0 + dg_dz * z[i-1] - cd_star * v[i-1]))
+        #print('Value of v[i] #1: ', v[i])
+        z = np.append(z,z[i-1] + dt * v[i-1])
+        #print('Value of z[i] #1: ',z[i])
+        
+
+        if z[i] >= H:
+            z[i] = H
+            #print('Value of z[i] #2: ',z[i])
+            dt = (z[i] - z[i-1])/v[i-1]
+            t = np.append(t,t[i-1] + dt)
+            #print('Value of t[i] #2: ', t[i])
+            v = np.append(v,v[i-1] + dt * (g0 + dg_dz * z[i-1] - cd_star * v[i-1]))
+            #break
+            
+        #print('Value of i: ',i)
+        i+=1
+        
+        
+    #print("t is: ",t)
+    #print('Value of t[-1]: ',t[-1])
     return t, z, v
 
 def ode_freefall_rk4(g0, dg_dz, cd_star, H, dt):
@@ -84,44 +98,59 @@ def ode_freefall_rk4(g0, dg_dz, cd_star, H, dt):
         Array of shape(n) that contains velocity v(t) values 
     """
     #find N using N=(b-a)/h to find difference 
-    a = 0
-    b = H
-    N = int(H/dt)
     
-    t = np.zeros(N+1)
-    z = np.zeros(N+1)
-    v = np.zeros(N+1)
-    a = np.zeros(N+1)
-
+    #N = int(H/dt)
+    N = 1
+    t = np.zeros(N)
+    z = np.zeros(N)
+    v = np.zeros(N)
+    
     t[0] = 0
     z[0] = 0
     v[0] = 0
-    a[0] = 0
-
-    #z[-1] = H
     
-    for i in np.arange(0,N+1):
-        t[i] = dt * i
-        a[i] = a[i-1] + dt * (g0 + dg_dz * z[i-1])
-        v[i] = v[i-1] + dt * (g0 + dg_dz * z[i-1] - a[i-1]) / cd_star
-        z[i] = z[i-1] + dt * -1 * (g0 - a[i-1] - cd_star * v[i-1]) / cd_star
-
-        a[i] = rk4_step(a[i-1],(g0 + dg_dz * z[i-1]),dt)
+    i=1
+    while z[-1] < H:
+        t = np.append(t,t[i-1] + dt)
+        #print('Value of t[i] #1: ',t[i])
+        k1_v = (g0 + dg_dz * z[i-1] - cd_star * v[i-1])
+        k1_z = v[i-1]
+        k2_v = (g0 + dg_dz * z[i-1] - cd_star * (v[i-1] + 0.5 * k1_v * dt))
+        k2_z = (0.5 * k1_z * dt) + v[i-1]
+        k3_v = (g0 + dg_dz * z[i-1] - cd_star * (v[i-1] + 0.5 * k2_v * dt))
+        k3_z = (0.5 * k2_z * dt) + v[i-1]
+        k4_v = (g0 + dg_dz * z[i-1] - cd_star * (v[i-1] + k3_v * dt))
+        k4_z = (k3_z * dt) + v[i-1]
         
+        rk4_v = v[i-1] + (k1_v+2*k2_v+2*k3_v+k4_v)*dt/6
+        rk4_z = z[i-1] + (k1_z+2*k2_z+2*k3_z+k4_z)*dt/6
+
+        v = np.append(v,rk4_v)
+        #print('Value of v[i] #1: ', v[i])
+        z = np.append(z,rk4_z)
+        #print('Value of z[i] #1: ',z[i])
+        
+
+        if z[i] >= H:
+            z[i] = H
+            #print('Value of z[i] #2: ',z[i])
+            dt = (z[i] - z[i-1])/v[i-1]
+            t = np.append(t,t[i-1] + dt)
+            #print('Value of t[i] #2: ', t[i])
+
+            k1_v = (g0 + dg_dz * z[i-1] - cd_star * v[i-1])
+            k2_v = (g0 + dg_dz * z[i-1] - cd_star * (v[i-1] + 0.5 * k1_v * dt))
+            k3_v = (g0 + dg_dz * z[i-1] - cd_star * (v[i-1] + 0.5 * k2_v * dt))
+            k4_v = (g0 + dg_dz * z[i-1] - cd_star * (v[i-1] + k3_v * dt))
+            
+            rk4_v = v[i-1] + (k1_v+2*k2_v+2*k3_v+k4_v)*dt/6
+        
+            v = np.append(v,rk4_v)
+            
+        #print('Value of i: ',i)
+        i+=1
+        
+        
+    #print("t is: ",t)
+    #print('Value of t[-1]: ',t[-1])
     return t, z, v
-
-def rk4_step(y,slope_fn,dt):
-    k1 = dt(slope_fn)
-    k2 = dt(slope_fn)
-    k3 = dt(slope_fn)
-    k4 = dt(slope_fn)
-    
-    y1 = y + dt * (k1 + 2*k2 + 2*k3 + k4)/6
-
-    return y1
-
-def velocity():
-
-def acceleration():
-
-def position():
