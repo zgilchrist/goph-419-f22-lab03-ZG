@@ -150,7 +150,6 @@ def ode_freefall_rk4(g0, dg_dz, cd_star, H, dt):
         #print('Value of i: ',i)
         i+=1
         
-        
     #print("t is: ",t)
     #print('Value of t[-1]: ',t[-1])
     return t, z, v
